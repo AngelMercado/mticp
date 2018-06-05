@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/security http://www.springframework.org/security/spring-security.xsd">
+
+
+	<!-- Beans -->
+	<bean id="jwtFilter"
+		class="com.mozcalti.cursos.springdemo.seguridad.TokenValidationFilter" />
+
+	<bean id="userDeailService"
+		class="com.mozcalti.cursos.springdemo.seguridad.CustomUserDetailsService" />
+
+	<bean id="successHandler"
+		class="com.mozcalti.cursos.springdemo.seguridad.CustomAuthenticationSuccessHandler" />
+
+	<bean id="entryPoint"
+		class="com.mozcalti.cursos.springdemo.seguridad.CustomEntryPoint" />
+
+
+	<!-- Autenticación -->
+	<security:authentication-manager>
+		<security:authentication-provider
+			user-service-ref="userDeailService">
+			<security:password-encoder hash="bcrypt" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+
+
+	<!-- Autorización -->
+	<security:global-method-security
+		secured-annotations="enabled" />
+
+	<security:http entry-point-ref="entryPoint"
+		create-session="stateless" use-expressions="true">
+
+		<security:csrf disabled="true" />
+
+		<security:custom-filter ref="jwtFilter" before="LOGIN_PAGE_FILTER" />
+
+		<security:intercept-url pattern="/login"
+			access="isAnonymous()" />
+
+		<security:intercept-url pattern="/prueba/**"
+			access="isAnonymous()" />
+
+		<security:intercept-url pattern="/**"
+			access="isAuthenticated()" />
+
+		<security:form-login
+			authentication-success-handler-ref="successHandler" />
+	</security:http>
+
+
+</beans>
